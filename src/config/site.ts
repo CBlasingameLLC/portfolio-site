@@ -3,7 +3,7 @@
 export const site = {
   name: 'Cayl Blasingame',
   initials: 'C. BLASINGAME',
-  url: 'https://portfolio-site.vercel.app',
+  url: 'https://portfolio-site-cblasingamellcs-projects.vercel.app',
   description:
     'Electrical engineering student at Texas State University. Builds the hardware first, then the software that runs on it.',
   school: 'Texas State University',
