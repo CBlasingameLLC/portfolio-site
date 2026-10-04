@@ -1,0 +1,75 @@
+---
+// CAD crosshair and X/Y readout in millimetres. Desktop with a fine pointer only; off under reduced motion.
+---
+
+<i class="xh h" aria-hidden="true"></i><i class="xh v" aria-hidden="true"></i>
+<div class="readout" aria-hidden="true">X 000.0&nbsp;&nbsp;Y 000.0 mm</div>
+
+<style>
+  .xh {
+    position: absolute;
+    pointer-events: none;
+    background: color-mix(in srgb, var(--acc) 45%, transparent);
+    display: none;
+    z-index: 5;
+  }
+  .h {
+    left: 0;
+    right: 0;
+    height: 1px;
+  }
+  .v {
+    top: 0;
+    bottom: 0;
+    width: 1px;
+  }
+  :global([data-xh='on']) .xh {
+    display: block;
+  }
+  .readout {
+    position: sticky;
+    bottom: 10px;
+    margin: -36px 10px 10px auto;
+    width: max-content;
+    padding: 4px 8px;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    font: 11px var(--font-mono);
+    color: var(--pm);
+    z-index: 6;
+    font-variant-numeric: tabular-nums;
+  }
+  @media (pointer: coarse), (max-width: 639px) {
+    .readout {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  const fine = matchMedia('(pointer: fine) and (min-width: 640px)');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  let frame = 0;
+
+  document.addEventListener('pointermove', (e) => {
+    const host = (e.target as Element).closest<HTMLElement>('[data-crosshair]');
+    document.querySelectorAll<HTMLElement>('[data-crosshair]').forEach((h) => {
+      if (h !== host) h.dataset.xh = 'off';
+    });
+    if (!host || frame) return;
+    frame = requestAnimationFrame(() => {
+      frame = 0;
+      const r = host.getBoundingClientRect();
+      const x = e.clientX - r.left, y = e.clientY - r.top;
+      const mm = (v: number) => ((v * 25.4) / 96).toFixed(1).padStart(5, '0');
+      const out = host.querySelector('.readout');
+      if (out) out.textContent = `X ${mm(x)}  Y ${mm(y)} mm`;
+      const on = fine.matches && !reduced.matches;
+      host.dataset.xh = on ? 'on' : 'off';
+      if (on) {
+        host.querySelector<HTMLElement>('.xh.h')!.style.top = `${y}px`;
+        host.querySelector<HTMLElement>('.xh.v')!.style.left = `${x}px`;
+      }
+    });
+  });
+</script>

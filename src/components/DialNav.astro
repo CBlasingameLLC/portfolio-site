@@ -1,0 +1,443 @@
+---
+// Rotary selector-switch navigation (spec §6).
+// Without JS this is a plain list of links. The script upgrades it to a rail that opens into a half-dial;
+// the same <a> elements are laid out on the dial, so keyboard and screen-reader users always reach real links.
+import { nav } from '../config/nav';
+
+const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const isCurrent = (href: string) => {
+  const h = href.replace(/\/+$/, '') || '/';
+  return h === '/' ? path === '/' : path === h || path.startsWith(h + '/');
+};
+---
+
+<nav class="dial" aria-label="Sheets" data-dial transition:persist="dial">
+  <button class="rail" type="button" aria-expanded="false" aria-controls="dial-face" hidden>
+    <span class="ticks" aria-hidden="true">{nav.map(() => <i />)}</span>
+    <span class="rl"><span class="n"></span> <span class="t"></span></span>
+  </button>
+  <div class="face" id="dial-face">
+    <svg class="fsvg" aria-hidden="true"></svg>
+    <ul>
+      {
+        nav.map((p, i) => (
+          <li>
+            <a href={p.href} data-i={i} data-label={p.label} aria-current={isCurrent(p.href) ? 'page' : undefined}>
+              <span class="n">{String(i + 1).padStart(2, '0')}</span>
+              {p.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</nav>
+
+<style>
+  /* ---------- Without JS: plain top bar ---------- */
+  .dial {
+    background: var(--paper);
+    border-bottom: 1px solid var(--rule);
+    padding: 10px 16px;
+  }
+  .face ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .face a {
+    font: 500 12px var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--pm);
+  }
+  .face a .n {
+    margin-right: 6px;
+    font-size: 10px;
+  }
+  .face a[aria-current='page'] {
+    color: var(--ink);
+  }
+  .face a[aria-current='page'] .n {
+    color: var(--acc);
+  }
+  .fsvg {
+    display: none;
+  }
+
+  /* ---------- Enhanced: rail + half-dial ---------- */
+  .dial.is-on {
+    position: sticky;
+    top: 34vh;
+    height: 210px;
+    width: 30px;
+    padding: 0;
+    border: 0;
+    background: none;
+    z-index: 40;
+  }
+  .is-on .rail {
+    all: unset;
+    box-sizing: border-box;
+    cursor: pointer;
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 8px 0;
+    color: var(--ink);
+  }
+  .is-on .rail:focus-visible {
+    outline: 2px solid var(--acc);
+    outline-offset: -2px;
+  }
+  .ticks {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 9px;
+    width: 16px;
+  }
+  .ticks :global(i) {
+    display: block;
+    height: 1px;
+    width: 8px;
+    background: var(--pm);
+  }
+  .ticks :global(i.on) {
+    width: 16px;
+    height: 2px;
+    background: var(--acc);
+  }
+  .rl {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font: 500 10px var(--font-mono);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .rl .n {
+    color: var(--acc);
+  }
+  .is-on .face {
+    position: absolute;
+    clip-path: circle(0px at var(--cx) var(--cy));
+    transition: clip-path 0.22s cubic-bezier(0.2, 0.7, 0.2, 1);
+    pointer-events: none;
+    touch-action: none;
+  }
+  .is-on[data-open='true'] .face {
+    clip-path: circle(var(--rb) at var(--cx) var(--cy));
+    pointer-events: auto;
+  }
+  .is-on .fsvg {
+    display: block;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+  .is-on .face ul {
+    display: block;
+  }
+  .is-on .face li {
+    display: contents;
+  }
+  .is-on .face a {
+    position: absolute;
+    font: 600 15px var(--font-display);
+    letter-spacing: 0;
+    text-transform: none;
+    white-space: nowrap;
+    padding: 4px 6px;
+    transition: color 0.12s;
+  }
+  .is-on .face a .n {
+    font: 10px var(--font-mono);
+    letter-spacing: 0.05em;
+  }
+  .is-on .face a[data-armed='true'] {
+    color: var(--ink);
+  }
+  .fsvg :global(.f-back) {
+    fill: var(--paper);
+    stroke: var(--ink);
+    stroke-width: 1.25;
+  }
+  .fsvg :global(.f-minor) {
+    stroke: var(--pm);
+    stroke-width: 1;
+  }
+  .fsvg :global(.f-major) {
+    stroke: var(--ink);
+    stroke-width: 1.5;
+  }
+  .fsvg :global(.f-major.armed) {
+    stroke: var(--acc);
+    stroke-width: 2.5;
+  }
+  .fsvg :global(.f-arc) {
+    fill: none;
+    stroke: var(--rule);
+  }
+  .fsvg :global(.f-knob) {
+    fill: var(--paper);
+    stroke: var(--ink);
+    stroke-width: 1.5;
+  }
+  .fsvg :global(.f-grip) {
+    stroke: var(--rule);
+    stroke-width: 1.2;
+  }
+  .fsvg :global(.f-ptr) {
+    stroke: var(--acc);
+    stroke-width: 3;
+    stroke-linecap: round;
+  }
+  .fsvg :global(.f-cap) {
+    fill: var(--ink);
+  }
+
+  @media (max-width: 639px) {
+    .dial.is-on {
+      position: sticky;
+      top: auto;
+      bottom: 0;
+      width: 100%;
+      height: 46px;
+      background: var(--paper);
+      border-top: 1px solid var(--ink);
+    }
+    .is-on .rail {
+      flex-direction: row;
+      justify-content: center;
+      gap: 14px;
+      padding: 0 12px;
+    }
+    .ticks {
+      flex-direction: row;
+      align-items: flex-end;
+      width: auto;
+      gap: 7px;
+      height: 16px;
+    }
+    .ticks :global(i) {
+      width: 1px;
+      height: 8px;
+    }
+    .ticks :global(i.on) {
+      width: 2px;
+      height: 16px;
+    }
+    .rl {
+      writing-mode: horizontal-tb;
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  import { navigate } from 'astro:transitions/client';
+
+  const SPAN = 32;
+  const rad = (d: number) => (d * Math.PI) / 180;
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  const narrow = matchMedia('(max-width: 639px)');
+
+  const dial = document.querySelector<HTMLElement>('[data-dial]');
+  if (dial && !dial.classList.contains('is-on')) setup(dial);
+
+  function setup(dial: HTMLElement) {
+    const rail = dial.querySelector<HTMLButtonElement>('.rail')!;
+    const face = dial.querySelector<HTMLElement>('.face')!;
+    const svg = dial.querySelector<SVGSVGElement>('.fsvg')!;
+    const links = [...dial.querySelectorAll<HTMLAnchorElement>('.face a')];
+    const N = links.length;
+    let G: { cx: number; cy: number; t0: number; angles: number[] } | null = null;
+    let current = -1, armed = 0, ang = 0, vel = 0, tgt = 0, raf = 0;
+    let closeT: ReturnType<typeof setTimeout> | undefined;
+
+    dial.classList.add('is-on');
+    rail.hidden = false;
+    face.inert = true;
+
+    function currentIndex(): number {
+      const path = location.pathname.replace(/\/+$/, '') || '/';
+      return links.findIndex((a) => {
+        const href = new URL(a.href).pathname.replace(/\/+$/, '') || '/';
+        return href === '/' ? path === '/' : path === href || path.startsWith(href + '/');
+      });
+    }
+
+    function build() {
+      const mobile = narrow.matches;
+      let R: number, Rb: number, W: number, H: number, cx: number, cy: number, t0: number;
+      if (!mobile) {
+        R = 140; Rb = R + 125; t0 = 0; W = Rb + 6; H = 2 * Rb + 8; cx = 0; cy = H / 2;
+        face.style.cssText = `left:0;top:50%;margin-top:${-cy}px;width:${W}px;height:${H}px`;
+      } else {
+        Rb = Math.min(176, innerWidth / 2 - 8); R = Rb - 70; t0 = -90; W = 2 * Rb + 8; H = Rb + 6; cx = W / 2; cy = H;
+        face.style.cssText = `left:50%;bottom:0;margin-left:${-W / 2}px;width:${W}px;height:${H}px`;
+      }
+      face.style.setProperty('--cx', `${cx}px`);
+      face.style.setProperty('--cy', `${cy}px`);
+      face.style.setProperty('--rb', `${Rb + 6}px`);
+      const angles = links.map((_, i) => t0 + (i - (N - 1) / 2) * SPAN);
+      G = { cx, cy, t0, angles };
+      svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+      const pt = (a: number, r: number) => [cx + r * Math.cos(rad(a)), cy + r * Math.sin(rad(a))];
+      const [sx, sy] = pt(t0 - 90, Rb), [ex, ey] = pt(t0 + 90, Rb);
+      const [ax, ay] = pt(t0 - 84, R - 4), [bx, by] = pt(t0 + 84, R - 4);
+      let s = `<path class="f-back" d="M${cx} ${cy} L${sx} ${sy} A${Rb} ${Rb} 0 0 1 ${ex} ${ey} Z"/>`;
+      s += `<path class="f-arc" d="M${ax} ${ay} A${R - 4} ${R - 4} 0 0 1 ${bx} ${by}"/>`;
+      for (let a = t0 - 80; a <= t0 + 80; a += 4) {
+        const [x1, y1] = pt(a, R - 4), [x2, y2] = pt(a, R + 2);
+        s += `<line class="f-minor" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`;
+      }
+      angles.forEach((a, i) => {
+        const [x1, y1] = pt(a, R - 8), [x2, y2] = pt(a, R + 12);
+        s += `<line class="f-major" data-i="${i}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`;
+      });
+      const Rk = Math.round(R * 0.56);
+      s += `<circle class="f-knob" cx="${cx}" cy="${cy}" r="${Rk}"/><g class="knob">`;
+      for (let a = 0; a < 360; a += 9) {
+        const [x1, y1] = pt(a, Rk - 9), [x2, y2] = pt(a, Rk - 3);
+        s += `<line class="f-grip" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`;
+      }
+      s += `<line class="f-ptr" x1="${cx + Rk * 0.2}" y1="${cy}" x2="${cx + Rk - 15}" y2="${cy}"/>`;
+      s += `<line class="f-ptr" x1="${cx + Rk + 4}" y1="${cy}" x2="${cx + R - 12}" y2="${cy}" style="stroke-width:1.5"/></g>`;
+      s += `<circle class="f-cap" cx="${cx}" cy="${cy}" r="4"/>`;
+      svg.innerHTML = s;
+      links.forEach((a, i) => {
+        const [x, y] = pt(angles[i], mobile ? R + 34 : R + 24);
+        a.style.left = `${x}px`;
+        a.style.top = `${y}px`;
+        a.style.transform = mobile ? 'translate(-50%,-50%)' : 'translate(0,-50%)';
+      });
+      arm(Math.max(current, 0), true);
+    }
+
+    function setKnob() {
+      svg.querySelector('.knob')?.setAttribute('transform', `rotate(${ang} ${G!.cx} ${G!.cy})`);
+    }
+
+    function arm(i: number, instant = false) {
+      armed = i;
+      links.forEach((a, j) => {
+        a.dataset.armed = String(j === i);
+        a.tabIndex = j === i ? 0 : -1;
+      });
+      svg.querySelectorAll<SVGLineElement>('.f-major').forEach((l) => l.classList.toggle('armed', Number(l.dataset.i) === i));
+      if (!G) return;
+      tgt = G.angles[i];
+      if (instant || reduced.matches) {
+        ang = tgt; vel = 0; setKnob();
+        return;
+      }
+      if (raf) return;
+      let last = performance.now();
+      const step = (t: number) => {
+        const dt = Math.min(0.032, (t - last) / 1000);
+        last = t;
+        const k = 420, c = 2 * Math.sqrt(k); // critically damped: settles without overshoot
+        vel += (-k * (ang - tgt) - c * vel) * dt;
+        ang += vel * dt;
+        setKnob();
+        if (Math.abs(ang - tgt) < 0.02 && Math.abs(vel) < 0.05) {
+          ang = tgt; setKnob(); raf = 0;
+          return;
+        }
+        raf = requestAnimationFrame(step);
+      };
+      raf = requestAnimationFrame(step);
+    }
+
+    function setOpen(open: boolean, focus = false) {
+      clearTimeout(closeT);
+      dial!.dataset.open = String(open);
+      rail.setAttribute('aria-expanded', String(open));
+      face.inert = !open;
+      if (open) {
+        arm(Math.max(current, 0), true);
+        if (focus) links[armed].focus();
+      }
+    }
+
+    function sync() {
+      current = currentIndex();
+      links.forEach((a, i) => {
+        if (i === current) a.setAttribute('aria-current', 'page');
+        else a.removeAttribute('aria-current');
+      });
+      rail.querySelectorAll('.ticks i').forEach((t, i) => t.classList.toggle('on', i === current));
+      const label = current >= 0 ? links[current].dataset.label ?? '' : 'Sheets';
+      rail.querySelector('.n')!.textContent = current >= 0 ? String(current + 1).padStart(2, '0') : '--';
+      rail.querySelector('.t')!.textContent = label;
+      rail.setAttribute('aria-label', `Page dial. Current sheet: ${label}. Open to change sheet.`);
+      setOpen(false);
+      arm(Math.max(current, 0), true);
+    }
+
+    rail.addEventListener('click', () => setOpen(dial!.dataset.open !== 'true', true));
+    rail.addEventListener('keydown', (e) => {
+      if (['ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+        e.preventDefault();
+        setOpen(true, true);
+      }
+    });
+    links.forEach((a, i) => {
+      a.addEventListener('pointerenter', () => arm(i));
+      a.addEventListener('click', () => setOpen(false));
+      a.addEventListener('keydown', (e) => {
+        const prev = ['ArrowUp', 'ArrowLeft'].includes(e.key), next = ['ArrowDown', 'ArrowRight'].includes(e.key);
+        if (prev || next) {
+          e.preventDefault();
+          const j = Math.max(0, Math.min(N - 1, armed + (prev ? -1 : 1)));
+          arm(j);
+          links[j].focus();
+        } else if (e.key === 'Escape') {
+          setOpen(false);
+          rail.focus();
+        }
+      });
+    });
+    dial.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') setOpen(true); });
+    dial.addEventListener('pointerleave', (e) => {
+      if (e.pointerType === 'mouse') closeT = setTimeout(() => setOpen(false), 260);
+    });
+    face.addEventListener('pointermove', (e) => {
+      if (!G) return;
+      const r = face.getBoundingClientRect();
+      let a = (Math.atan2(e.clientY - r.top - G.cy, e.clientX - r.left - G.cx) * 180) / Math.PI - G.t0;
+      a = ((a + 540) % 360) - 180;
+      const i = Math.max(0, Math.min(N - 1, Math.round(a / SPAN + (N - 1) / 2)));
+      if (i !== armed) arm(i);
+    });
+    face.addEventListener('pointerdown', (e) => {
+      if (e.pointerType !== 'mouse') face.setPointerCapture(e.pointerId);
+    });
+    face.addEventListener('pointerup', (e) => {
+      // Taps on a label are handled by the link itself; drags that end elsewhere on the face pick the armed detent.
+      if (e.pointerType === 'mouse' || (e.target as Element).closest('a')) return;
+      setOpen(false);
+      navigate(links[armed].href);
+    });
+    document.addEventListener('pointerdown', (e) => {
+      if (dial!.dataset.open === 'true' && !dial!.contains(e.target as Node)) setOpen(false);
+    });
+    narrow.addEventListener('change', build);
+
+    current = currentIndex();
+    build();
+    sync();
+    document.addEventListener('astro:page-load', sync);
+  }
+</script>

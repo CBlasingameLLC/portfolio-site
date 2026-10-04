@@ -1,0 +1,37 @@
+---
+import SheetLayout from '../../layouts/SheetLayout.astro';
+import PageHead from '../../components/PageHead.astro';
+import { sheetOf, sheetCount } from '../../config/nav';
+import { publishedProjects } from '../../lib/projects';
+
+const { number, dwg } = sheetOf('work');
+const projects = await publishedProjects();
+---
+
+<SheetLayout title="Work" sheet={`${number} OF ${sheetCount}`} dwg={dwg} source="src/pages/work/index.astro">
+  <PageHead kicker={`Sheet ${number} · Current work`} title="Work">
+    {projects.length === 0 && <p class="note">[Phase 2: detail cards, category filter and BOM view go here once the first case study is written.]</p>}
+  </PageHead>
+  {
+    projects.length > 0 && (
+      <ul class="list">
+        {projects.map((p) => (
+          <li>
+            <a href={`/work/${p.id}/`}>{p.data.title}</a> <span class="label">{p.data.category}</span>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</SheetLayout>
+
+<style>
+  .list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 8px;
+    font-size: 17px;
+  }
+</style>

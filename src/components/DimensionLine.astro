@@ -1,0 +1,48 @@
+---
+interface Props {
+  label: string;
+}
+const { label } = Astro.props;
+---
+
+<div class="dim draw-x" style="--d:.5s" role="presentation">
+  <span class="tk"></span><span class="ar l"></span><span class="ln"></span><span class="lab">{label}</span><span
+    class="ln"></span><span class="ar r"></span><span class="tk"></span>
+</div>
+
+<style>
+  .dim {
+    display: flex;
+    align-items: center;
+    font: 10.5px var(--font-mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .tk {
+    width: 1px;
+    height: 18px;
+    background: var(--ink);
+  }
+  .ln {
+    flex: 1;
+    height: 1px;
+    background: var(--ink);
+  }
+  .ar {
+    width: 0;
+    height: 0;
+    border-top: 3.5px solid transparent;
+    border-bottom: 3.5px solid transparent;
+  }
+  .ar.l {
+    border-right: 8px solid var(--ink);
+  }
+  .ar.r {
+    border-left: 8px solid var(--ink);
+  }
+  .lab {
+    padding: 0 10px;
+    white-space: nowrap;
+    background: var(--paper);
+  }
+</style>

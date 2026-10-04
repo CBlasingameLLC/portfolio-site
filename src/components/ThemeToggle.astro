@@ -1,0 +1,45 @@
+---
+// Dark (drafting film) is the default. The choice is stored per visitor; the head script applies it before paint.
+---
+
+<button class="theme" type="button" data-theme-toggle aria-pressed="false">
+  <span class="k">Theme</span> <span class="v" data-theme-label>Dark</span>
+</button>
+
+<style>
+  .theme {
+    all: unset;
+    cursor: pointer;
+    font: 11px var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 1px solid var(--rule);
+    padding: 5px 9px;
+    background: var(--paper);
+  }
+  .theme:focus-visible {
+    outline: 2px solid var(--acc);
+    outline-offset: 2px;
+  }
+  .k {
+    color: var(--pm);
+  }
+</style>
+
+<script>
+  function label() {
+    const light = document.documentElement.dataset.theme === 'light';
+    document.querySelectorAll<HTMLElement>('[data-theme-label]').forEach((el) => (el.textContent = light ? 'Light' : 'Dark'));
+    document.querySelectorAll('[data-theme-toggle]').forEach((b) => b.setAttribute('aria-pressed', String(light)));
+  }
+  document.addEventListener('click', (e) => {
+    if (!(e.target as Element).closest('[data-theme-toggle]')) return;
+    const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+    document.documentElement.dataset.theme = next;
+    try {
+      localStorage.setItem('theme', next);
+    } catch {}
+    label();
+  });
+  document.addEventListener('astro:page-load', label);
+</script>

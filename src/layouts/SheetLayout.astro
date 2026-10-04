@@ -1,0 +1,262 @@
+---
+// Every page is one drafting sheet (spec §4): zone frame, header strip, body, signed line, title block.
+import '../styles/global.css';
+import { ClientRouter } from 'astro:transitions';
+import { site } from '../config/site';
+import { lastModified, shortRev } from '../lib/git';
+import DialNav from '../components/DialNav.astro';
+import HeaderStrip from '../components/HeaderStrip.astro';
+import TitleBlock from '../components/TitleBlock.astro';
+import SignedLine from '../components/SignedLine.astro';
+import ThemeToggle from '../components/ThemeToggle.astro';
+import CrosshairReadout from '../components/CrosshairReadout.astro';
+
+interface Props {
+  /** Page title, also used in the title block. */
+  title: string;
+  description?: string;
+  /** Header-strip project name. */
+  project?: string;
+  /** e.g. "1 OF 5" or "2.1 OF 5". */
+  sheet: string;
+  /** Drawing number, e.g. CB-001. */
+  dwg: string;
+  /** Repo-relative source file whose last commit dates this sheet. */
+  source: string;
+}
+
+const { title, description = site.description, project = 'Portfolio', sheet, dwg, source } = Astro.props;
+const date = lastModified(source);
+const rev = shortRev();
+const pageTitle = title === 'Index' ? `${site.name} · Electrical Engineering` : `${title} · ${site.name}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const zones = ['A', 'B', 'C', 'D'];
+---
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="theme-color" content="#0F1A26" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:type" content="website" />
+    <script is:inline>
+      // Runs before paint and after every client-side navigation: theme, JS flag, once-per-session plotter.
+      (function () {
+        var root = document.documentElement;
+        function apply(doc) {
+          var t = null;
+          try { t = localStorage.getItem('theme'); } catch (e) {}
+          doc.documentElement.dataset.theme = t === 'light' ? 'light' : 'dark';
+          doc.documentElement.classList.add('js');
+        }
+        apply(document);
+        var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var seen = false;
+        try { seen = sessionStorage.getItem('plotted') === '1'; sessionStorage.setItem('plotted', '1'); } catch (e) {}
+        if (!seen && !reduce) {
+          root.classList.add('plotting');
+          setTimeout(function () { root.classList.remove('plotting'); }, 2400);
+        }
+        document.addEventListener('astro:before-swap', function (e) { apply(e.newDocument); });
+      })();
+    </script>
+    <ClientRouter />
+  </head>
+  <body>
+    <a class="skip" href="#sheet">Skip to sheet</a>
+    <div class="page">
+      <DialNav />
+      <main id="sheet" class="wrap" data-crosshair transition:name="sheet">
+        <div class="zrow" aria-hidden="true">{[1, 2, 3, 4, 5, 6].map((n) => <span>{n}</span>)}</div>
+        <div class="zmid">
+          <div class="zcol" aria-hidden="true">{zones.map((z) => <span>{z}</span>)}</div>
+          <div class="sheet">
+            <i class="fl t draw-x" aria-hidden="true"></i>
+            <i class="fl r draw-y" style="--d:.25s" aria-hidden="true"></i>
+            <i class="fl b draw-x" style="--d:.5s" aria-hidden="true"></i>
+            <i class="fl l draw-y" style="--d:.75s" aria-hidden="true"></i>
+            <HeaderStrip project={project} sheet={sheet} date={date} />
+            <slot />
+            <footer class="foot" id="contact">
+              <div class="sign">
+                <SignedLine date={date} />
+                <ul class="contact" aria-label="Contact">
+                  <li><span class="label">Email</span> <a href={`mailto:${site.contact.email}`}>{site.contact.email}</a></li>
+                  <li><a href={site.contact.github}>GitHub</a></li>
+                  {site.contact.linkedin && <li><a href={site.contact.linkedin}>LinkedIn</a></li>}
+                  <li><ThemeToggle /></li>
+                </ul>
+              </div>
+              <TitleBlock title={title} dwg={dwg} date={date} rev={rev} sheet={sheet} />
+            </footer>
+          </div>
+          <div class="zcol" aria-hidden="true">{zones.map((z) => <span>{z}</span>)}</div>
+        </div>
+        <div class="zrow" aria-hidden="true">{[1, 2, 3, 4, 5, 6].map((n) => <span>{n}</span>)}</div>
+        <CrosshairReadout />
+      </main>
+    </div>
+  </body>
+</html>
+
+<style is:global>
+  .skip {
+    position: absolute;
+    left: 8px;
+    top: -40px;
+    z-index: 100;
+    background: var(--paper);
+    padding: 6px 10px;
+    font: 12px var(--font-mono);
+  }
+  .skip:focus {
+    top: 8px;
+  }
+  .page {
+    max-width: 1320px;
+    margin: 0 auto;
+    background: var(--paper);
+    min-height: 100vh;
+  }
+  .js .page {
+    display: grid;
+    grid-template-columns: 30px minmax(0, 1fr);
+  }
+  .js .page > .dial {
+    align-self: start;
+  }
+  .wrap {
+    position: relative;
+    min-width: 0;
+    overflow: clip;
+    padding: 12px 10px 16px;
+    view-transition-name: sheet;
+  }
+  .js .wrap {
+    border-left: 1px solid var(--rule);
+  }
+  .zrow {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    padding: 0 20px;
+    font: 10px/18px var(--font-mono);
+    color: var(--pm);
+    text-align: center;
+  }
+  .zmid {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr) 20px;
+  }
+  .zcol {
+    display: grid;
+    grid-template-rows: repeat(4, 1fr);
+    align-items: center;
+    text-align: center;
+    font: 10px var(--font-mono);
+    color: var(--pm);
+  }
+  .sheet {
+    position: relative;
+    min-width: 0;
+    padding: clamp(18px, 3.4vw, 44px);
+    display: grid;
+    gap: clamp(30px, 4vw, 46px);
+    align-content: start;
+    background-image:
+      linear-gradient(var(--grid2) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid2) 1px, transparent 1px),
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 94.5px 94.5px, 94.5px 94.5px, 18.9px 18.9px, 18.9px 18.9px;
+    background-position: -1px -1px;
+  }
+  .sheet > * {
+    position: relative;
+  }
+  .sheet > .fl {
+    position: absolute;
+    background: var(--ink);
+    z-index: 1;
+  }
+  .fl.t {
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1.5px;
+  }
+  .fl.b {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1.5px;
+    transform-origin: right center;
+  }
+  .fl.l {
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 1.5px;
+    transform-origin: center bottom;
+  }
+  .fl.r {
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: 1.5px;
+  }
+  .foot {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, auto);
+    gap: 18px 24px;
+    align-items: end;
+    margin-top: 12px;
+  }
+  .sign {
+    display: grid;
+    gap: 14px;
+  }
+  .contact {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font: 12px var(--font-mono);
+  }
+  @media (max-width: 639px) {
+    .js .page {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .js .page > .dial {
+      order: 2;
+      align-self: auto;
+    }
+    .js .wrap {
+      border-left: 0;
+    }
+    .wrap {
+      padding: 10px 8px 14px;
+    }
+    .zrow,
+    .zcol {
+      display: none;
+    }
+    .zmid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .foot {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

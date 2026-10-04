@@ -1,0 +1,47 @@
+---
+import SheetLayout from '../layouts/SheetLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import { sheetOf, sheetCount } from '../config/nav';
+
+const { number, dwg } = sheetOf('colophon');
+const facts: [string, string][] = [
+  ['Framework', 'Astro 7, MDX content collections'],
+  ['Styling', 'Tailwind CSS 4, hand-written component CSS'],
+  ['Type', 'IBM Plex Sans Condensed, IBM Plex Sans, IBM Plex Mono'],
+  ['Hosting', 'Vercel'],
+  ['Source', 'github.com/CBlasingameLLC/portfolio-site'],
+];
+---
+
+<SheetLayout title="Colophon" sheet={`${number} OF ${sheetCount}`} dwg={dwg} source="src/pages/colophon.astro">
+  <PageHead kicker={`Sheet ${number}`} title="Colophon">
+    <p class="note">[Phase 3: how the site is built and a plain statement of where AI assistance was used.]</p>
+  </PageHead>
+  <dl class="facts">
+    {facts.map(([k, v]) => <><dt class="label">{k}</dt><dd>{v}</dd></>)}
+  </dl>
+</SheetLayout>
+
+<style>
+  .facts {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    margin: 0;
+    max-width: 640px;
+    border: 1px solid var(--ink);
+    background: var(--paper);
+  }
+  dt,
+  dd {
+    margin: 0;
+    padding: 8px 12px;
+    border-top: 1px solid var(--rule);
+  }
+  dt:first-of-type,
+  dd:first-of-type {
+    border-top: 0;
+  }
+  dd {
+    font: 13px var(--font-mono);
+  }
+</style>

@@ -1,0 +1,51 @@
+---
+// Revision-triangle note. Red is reserved for these.
+interface Props {
+  rev: string;
+  heading?: string;
+}
+const { rev, heading } = Astro.props;
+---
+
+<aside class="redline">
+  <svg width="22" height="20" viewBox="0 0 22 20" aria-hidden="true">
+    <path d="M11 1.5 L20.5 18.5 H1.5 Z" fill="none" stroke="currentColor" stroke-width="1.4"></path>
+    <text x="11" y="15.5" text-anchor="middle" font-size="9" fill="currentColor">{rev}</text>
+  </svg>
+  <div>
+    <span class="sr">Revision {rev}: </span>
+    {heading && <strong>{heading}</strong>}
+    <slot />
+  </div>
+</aside>
+
+<style>
+  .redline {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font: 12.5px/1.55 var(--font-mono);
+    color: var(--acc);
+    border: 1.25px solid var(--acc);
+    padding: 10px 12px;
+    background: var(--paper);
+  }
+  svg {
+    flex: none;
+    font-family: var(--font-mono);
+  }
+  strong {
+    display: block;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+  .sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+</style>

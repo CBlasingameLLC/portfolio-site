@@ -126,8 +126,8 @@ export const collections = { projects, log };
 | BOM sort / filter | Work | View transitions reorder rows |
 | CAD crosshair + mm readout | Desktop, fine pointer | Small script, `pointermove`, rAF-throttled |
 | Figure highlights | Case studies | CSS scroll-driven `animation-timeline: view()` |
-- Library: Motion (motion.dev) only where springs are needed (dial). Everything else is CSS. GSAP only if a specific
-  case-study sequence requires it, and it must fit the JS budget.
+- No animation library. The dial's spring is a ~20-line critically damped integrator in `DialNav.astro`; everything
+  else is CSS. Add a library only if a specific case-study sequence needs one and it fits the JS budget.
 - `prefers-reduced-motion: reduce` disables all of the above except instant state changes.
 
 ## 7. SEO, sharing, analytics
@@ -137,6 +137,9 @@ export const collections = { projects, log };
 - Vercel Web Analytics (free tier).
 
 ## 8. Hosting and domain
+- Status (2026-10-04): domain `caylblasingame.tech` (GitHub Student Pack, .TECH registry; renews ~$50/yr after year one).
+  Apex is canonical; `www` redirects to apex. Vercel Authentication applies to preview deployments only.
+- Vercel env `VERCEL_DEEP_CLONE=true` so build-time `git log` dates are per-file, not the clone date.
 - Vercel Git integration: production on the default branch, preview deploys per branch.
 - Domain: GitHub Student Developer Pack free domain. Before claiming, check the current Pack offers and renewal price
   (as of 2026: `.me` via Namecheap renews ~$20/yr; `.tech` ~$50/yr). Set a renewal reminder 11 months out.
@@ -160,7 +163,7 @@ export const collections = { projects, log };
 ## 11. Roadmap
 | Phase | Scope | Done when |
 |---|---|---|
-| 1 Scaffold | Astro + Tailwind v4 + MDX, tokens, `SheetLayout`, header strip, title block, dial nav, empty pages, theme toggle, Vercel project, domain | Live domain serves the empty sheets over HTTPS; `astro check` clean |
+| 1 Scaffold (Astro 7.3) | Astro + Tailwind v4 + MDX, tokens, `SheetLayout`, header strip, title block, dial nav, empty pages, theme toggle, Vercel project, domain | Live domain serves the empty sheets over HTTPS; `astro check` clean |
 | 2 Content | Index, Work (filters + BOM), About, case-study template, 3 case studies from existing projects | Cayl has written all copy on those pages; real photos in place |
 | 3 Polish | Resume (HTML + PDF), Colophon, 404, OG images, sitemap, JSON-LD, analytics, responsive and accessibility QA | Lighthouse targets met on mobile; keyboard-only and screen-reader pass |
 | 4 Launch | URL on LinkedIn, GitHub profile README, resume header, email signature | Links live |
