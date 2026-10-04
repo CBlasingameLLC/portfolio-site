@@ -1,0 +1,181 @@
+@import 'tailwindcss';
+
+/* Fonts: self-hosted, latin subset only. */
+@import '@fontsource/ibm-plex-sans-condensed/latin-600.css';
+@import '@fontsource/ibm-plex-sans/latin-400.css';
+@import '@fontsource/ibm-plex-sans/latin-500.css';
+@import '@fontsource/ibm-plex-mono/latin-400.css';
+@import '@fontsource/ibm-plex-mono/latin-500.css';
+
+/* Sheet tokens. Dark (drafting film) is the default; light (vellum) only via [data-theme="light"]. */
+:root {
+  --paper: #0f1a26;
+  --ink: #d9e3ec;
+  --pm: #8899a8;
+  --rule: #34475a;
+  --grid: #162536;
+  --grid2: #1e3247;
+  --acc: #ff7a66;
+  --chrome: #0a121b;
+  color-scheme: dark;
+}
+:root[data-theme='light'] {
+  --paper: #e9ece8;
+  --ink: #14181c;
+  --pm: #535b61;
+  --rule: #9aa3a6;
+  --grid: #dce1dd;
+  --grid2: #c9d0cc;
+  --acc: #c2271b;
+  --chrome: #dadedb;
+  color-scheme: light;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-pm: var(--pm);
+  --color-rule: var(--rule);
+  --color-acc: var(--acc);
+  --font-display: 'IBM Plex Sans Condensed', 'Arial Narrow', sans-serif;
+  --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+}
+
+@layer base {
+  html {
+    background: var(--chrome);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    background: var(--chrome);
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  a {
+    color: inherit;
+  }
+  :focus-visible {
+    outline: 2px solid var(--acc);
+    outline-offset: 2px;
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+}
+
+/* Controls that only work with JS stay out of the no-JS page. */
+html:not(.js) [data-theme-toggle],
+html:not(.js) .readout {
+  display: none !important;
+}
+
+@layer components {
+  .disp {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.012em;
+  }
+  .label {
+    font: 11px/1.4 var(--font-mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--pm);
+  }
+  .ph {
+    color: var(--pm);
+  }
+  .cta {
+    font: 13px var(--font-mono);
+    text-decoration: none;
+    border-bottom: 1.5px solid currentColor;
+    padding-bottom: 2px;
+  }
+  .cta:hover {
+    color: var(--acc);
+  }
+  .sr-only-focusable:not(:focus) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* Plotter draw-in. The layout adds .plotting to <html> once per session. */
+.draw-x {
+  transform-origin: left center;
+}
+.draw-y {
+  transform-origin: center top;
+}
+.plot {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+.plotting .draw-x {
+  animation: draw-x 0.75s cubic-bezier(0.65, 0, 0.25, 1) both;
+  animation-delay: var(--d, 0s);
+}
+.plotting .draw-y {
+  animation: draw-y 0.75s cubic-bezier(0.65, 0, 0.25, 1) both;
+  animation-delay: var(--d, 0s);
+}
+.plotting .plot {
+  animation: plot 1.1s cubic-bezier(0.5, 0, 0.2, 1) both;
+  animation-delay: var(--d, 0s);
+}
+@keyframes draw-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes draw-y {
+  from {
+    transform: scaleY(0);
+  }
+}
+@keyframes plot {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+
+/* Sheet change */
+::view-transition-old(sheet) {
+  animation: sheet-out 0.26s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+::view-transition-new(sheet) {
+  animation: sheet-in 0.3s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@keyframes sheet-out {
+  to {
+    transform: translateX(-24px);
+    opacity: 0;
+  }
+}
+@keyframes sheet-in {
+  from {
+    transform: translateX(32px);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after,
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+    transition: none !important;
+  }
+}

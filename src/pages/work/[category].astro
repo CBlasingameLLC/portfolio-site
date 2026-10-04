@@ -1,0 +1,39 @@
+---
+import type { GetStaticPaths } from 'astro';
+import SheetLayout from '../../layouts/SheetLayout.astro';
+import PageHead from '../../components/PageHead.astro';
+import { sheetOf, sheetCount } from '../../config/nav';
+import { categories, type Category } from '../../config/taxonomy';
+import { publishedProjects } from '../../lib/projects';
+
+// A category route exists only once it has published work, so no sheet is ever empty.
+export const getStaticPaths = (async () => {
+  const projects = await publishedProjects();
+  return (Object.keys(categories) as Category[])
+    .map((category) => ({ category, items: projects.filter((p) => p.data.category === category) }))
+    .filter(({ items }) => items.length > 0)
+    .map(({ category, items }) => ({ params: { category }, props: { category, items } }));
+}) satisfies GetStaticPaths;
+
+const { category, items } = Astro.props;
+const { number, dwg } = sheetOf('work');
+const label = categories[category as Category];
+---
+
+<SheetLayout title={`Work: ${label}`} sheet={`${number} OF ${sheetCount}`} dwg={dwg} source="src/pages/work/[category].astro">
+  <PageHead kicker={`Sheet ${number} · ${label}`} title={label} />
+  <ul class="list">
+    {items.map((p) => <li><a href={`/work/${p.id}/`}>{p.data.title}</a></li>)}
+  </ul>
+</SheetLayout>
+
+<style>
+  .list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 8px;
+    font-size: 17px;
+  }
+</style>

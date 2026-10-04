@@ -1,0 +1,54 @@
+---
+import SheetLayout from '../layouts/SheetLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import Redline from '../components/Redline.astro';
+import { sheetCount } from '../config/nav';
+---
+
+<SheetLayout title="Open circuit" sheet={`— OF ${sheetCount}`} dwg="CB-404" source="src/pages/404.astro">
+  <PageHead kicker="Error 404" title="Open circuit">
+    <p class="note">No continuity at this address. The page may have moved, or the link has a typo.</p>
+  </PageHead>
+  <figure class="fig">
+    <svg viewBox="0 0 640 120" role="img" aria-label="A circuit trace with a resistor and a break in the line">
+      <path class="tr plot" pathLength="1" d="M10 60 H150 L160 45 L180 75 L200 45 L220 75 L240 45 L250 60 H330"></path>
+      <path class="tr plot" pathLength="1" d="M370 60 H630" style="--d:.3s"></path>
+      <circle class="pad" cx="10" cy="60" r="5"></circle>
+      <circle class="pad" cx="630" cy="60" r="5"></circle>
+      <path class="brk" d="M330 48 L338 72 M362 48 L370 72"></path>
+      <text x="350" y="36" text-anchor="middle">OPEN</text>
+    </svg>
+  </figure>
+  <Redline rev="?">Return to <a href="/">Sheet 1 · Index</a>.</Redline>
+</SheetLayout>
+
+<style>
+  .fig {
+    margin: 0;
+    max-width: 640px;
+  }
+  svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .tr {
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 2;
+  }
+  .pad {
+    fill: var(--paper);
+    stroke: var(--ink);
+    stroke-width: 2;
+  }
+  .brk {
+    stroke: var(--acc);
+    stroke-width: 2;
+  }
+  text {
+    fill: var(--acc);
+    font: 12px var(--font-mono);
+    letter-spacing: 0.1em;
+  }
+</style>

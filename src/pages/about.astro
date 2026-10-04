@@ -1,0 +1,13 @@
+---
+import SheetLayout from '../layouts/SheetLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import { sheetOf, sheetCount } from '../config/nav';
+
+const { number, dwg } = sheetOf('about');
+---
+
+<SheetLayout title="About" sheet={`${number} OF ${sheetCount}`} dwg={dwg} source="src/pages/about.astro">
+  <PageHead kicker={`Sheet ${number}`} title="About">
+    <p class="note">[Phase 2: headshot, a 150 to 250 word bio in your own words, Eagle Scout, and the facts table.]</p>
+  </PageHead>
+</SheetLayout>

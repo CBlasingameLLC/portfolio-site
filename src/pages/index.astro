@@ -1,0 +1,79 @@
+---
+import SheetLayout from '../layouts/SheetLayout.astro';
+import Redline from '../components/Redline.astro';
+import DimensionLine from '../components/DimensionLine.astro';
+import { sheetOf, sheetCount } from '../config/nav';
+import { site } from '../config/site';
+
+const { number, dwg } = sheetOf('index');
+---
+
+<SheetLayout title="Index" sheet={`${number} OF ${sheetCount}`} dwg={dwg} source="src/pages/index.astro">
+  <section class="hero">
+    <h1 class="disp">Electrical engineering at Texas State. I build the hardware first, then the software that runs on it.</h1>
+    <div class="side">
+      <Redline rev="A">Only finished and in-progress work appears on these sheets.</Redline>
+      <div class="ctas">
+        <a class="cta" href="/resume/">Resume (PDF) ↓</a>
+        <a class="cta" href="/work/">Work →</a>
+        <a class="cta" href="#contact">Contact</a>
+      </div>
+    </div>
+    <div class="dimrow"><DimensionLine label="Hardware, then software" /></div>
+  </section>
+
+  <section aria-labelledby="notes-h">
+    <h2 id="notes-h" class="label">Notes:</h2>
+    <ol class="notes">
+      <li>B.S. Electrical Engineering, {site.school} (in progress).</li>
+      <li>Eagle Scout, Troop 333.</li>
+      <li>High school salutatorian.</li>
+      <li>Full-ride scholarship recipient.</li>
+    </ol>
+  </section>
+</SheetLayout>
+
+<style>
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+    gap: 28px 40px;
+    align-items: end;
+  }
+  h1 {
+    font-size: clamp(30px, 4.6vw, 58px);
+    line-height: 1.04;
+    margin: 0;
+    max-width: 19ch;
+  }
+  .side {
+    display: grid;
+    gap: 18px;
+    align-content: end;
+  }
+  .ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 20px;
+  }
+  .dimrow {
+    grid-column: 1 / -1;
+    margin-top: 10px;
+  }
+  h2 {
+    margin: 0 0 8px;
+    font-weight: 400;
+  }
+  .notes {
+    margin: 0;
+    padding-left: 2.2em;
+    font: 12px/1.9 var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  @media (max-width: 639px) {
+    .hero {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

@@ -1,0 +1,61 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { render } from 'astro:content';
+import SheetLayout from '../../layouts/SheetLayout.astro';
+import PageHead from '../../components/PageHead.astro';
+import { sheetOf, sheetCount } from '../../config/nav';
+import { categories } from '../../config/taxonomy';
+import { publishedProjects, type Project } from '../../lib/projects';
+
+export const getStaticPaths = (async () => {
+  const projects = await publishedProjects();
+  return projects.map((entry, i) => ({ params: { slug: entry.id }, props: { entry, i } }));
+}) satisfies GetStaticPaths;
+
+const { entry, i } = Astro.props as { entry: Project; i: number };
+const { Content } = await render(entry);
+const work = sheetOf('work');
+const letter = String.fromCharCode(65 + i);
+const d = entry.data;
+---
+
+<SheetLayout
+  title={d.title}
+  description={d.summary}
+  project={d.title}
+  sheet={`${work.number}.${i + 1} OF ${sheetCount}`}
+  dwg={`${work.dwg}-${letter}`}
+  source={entry.filePath ?? 'src/content/projects'}
+>
+  <a class="back" href="/work/">← Sheet {work.number} · Work</a>
+  <PageHead kicker={`Detail ${letter} · ${categories[d.category]}${d.draft ? ' · draft' : ''}`} title={d.title}>
+    <p class="note">{d.summary}</p>
+  </PageHead>
+  <article class="body">
+    <Content />
+  </article>
+</SheetLayout>
+
+<style>
+  .back {
+    font: 12px var(--font-mono);
+    text-decoration: none;
+    color: var(--pm);
+  }
+  .back:hover {
+    color: var(--acc);
+  }
+  .body {
+    max-width: 68ch;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  .body :global(h2) {
+    font: 500 12px var(--font-mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-top: 1px solid var(--rule);
+    padding-top: 18px;
+    margin: 28px 0 10px;
+  }
+</style>

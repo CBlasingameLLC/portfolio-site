@@ -1,0 +1,36 @@
+---
+interface Props {
+  kicker: string;
+  title: string;
+}
+const { kicker, title } = Astro.props;
+---
+
+<header class="phead">
+  <p class="label">{kicker}</p>
+  <h1 class="disp">{title}</h1>
+  <slot />
+</header>
+
+<style>
+  .phead {
+    display: grid;
+    gap: 8px;
+  }
+  p {
+    margin: 0;
+  }
+  h1 {
+    margin: 0;
+    font-size: clamp(32px, 4.6vw, 56px);
+    line-height: 1.04;
+    max-width: 22ch;
+  }
+  .phead :global(.note) {
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.55;
+    max-width: 60ch;
+    color: var(--pm);
+  }
+</style>

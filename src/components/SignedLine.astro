@@ -1,0 +1,56 @@
+---
+// Renders Cayl's scanned signature once src/assets/signature.svg exists (single-path SVG, stroke="currentColor").
+// Until then the line stays blank; no stand-in signature ships.
+interface Props {
+  date: string;
+}
+const { date } = Astro.props;
+const found = import.meta.glob<string>('../assets/signature.svg', { query: '?raw', import: 'default', eager: true });
+const signature = Object.values(found)[0];
+---
+
+<div class="signed">
+  <span>Signed</span>
+  <div class="sig">{signature && <Fragment set:html={signature} />}</div>
+  <span>Date</span>
+  <div class="sigd">{date}</div>
+</div>
+
+<style>
+  .signed {
+    display: grid;
+    grid-template-columns: auto minmax(120px, 220px) auto minmax(90px, 130px);
+    gap: 6px 12px;
+    align-items: end;
+    font: 9.5px var(--font-mono);
+    letter-spacing: 0.08em;
+    color: var(--pm);
+    text-transform: uppercase;
+  }
+  .sig {
+    height: 44px;
+    border-bottom: 1px solid var(--ink);
+    color: var(--ink);
+    position: relative;
+  }
+  .sig :global(svg) {
+    position: absolute;
+    left: 4px;
+    bottom: 3px;
+    height: 38px;
+    width: auto;
+    max-width: 100%;
+  }
+  .sigd {
+    border-bottom: 1px solid var(--ink);
+    font: 12px var(--font-mono);
+    color: var(--ink);
+    padding-bottom: 3px;
+    letter-spacing: 0;
+  }
+  @media (max-width: 639px) {
+    .signed {
+      grid-template-columns: auto minmax(0, 1fr);
+    }
+  }
+</style>

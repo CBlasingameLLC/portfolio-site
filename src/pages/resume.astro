@@ -1,0 +1,13 @@
+---
+import SheetLayout from '../layouts/SheetLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import { sheetOf, sheetCount } from '../config/nav';
+
+const { number, dwg } = sheetOf('resume');
+---
+
+<SheetLayout title="Resume" sheet={`${number} OF ${sheetCount}`} dwg={dwg} source="src/pages/resume.astro">
+  <PageHead kicker={`Sheet ${number}`} title="Resume">
+    <p class="note">[Phase 3: experience, leadership, education, coursework, certifications, and the PDF download.]</p>
+  </PageHead>
+</SheetLayout>
