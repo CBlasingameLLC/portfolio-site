@@ -90,7 +90,7 @@ const zones = ['A', 'B', 'C', 'D'];
               <div class="sign">
                 <SignedLine date={date} />
                 <ul class="contact" aria-label="Contact">
-                  <li><span class="label">Email</span> {site.contact.email}</li>
+                  <li><span class="label">Email</span> <a href={`mailto:${site.contact.email}`}>{site.contact.email}</a></li>
                   <li><a href={site.contact.github}>GitHub</a></li>
                   {site.contact.linkedin && <li><a href={site.contact.linkedin}>LinkedIn</a></li>}
                   <li><ThemeToggle /></li>

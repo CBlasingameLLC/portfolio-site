@@ -137,7 +137,8 @@ export const collections = { projects, log };
 - Vercel Web Analytics (free tier).
 
 ## 8. Hosting and domain
-- Status (2026-10-04): Vercel project created; site served from the Vercel URL. Domain not claimed yet.
+- Status (2026-10-04): domain `caylblasingame.tech` (GitHub Student Pack, .TECH registry; renews ~$50/yr after year one).
+  Apex is canonical; `www` redirects to apex. Vercel Authentication applies to preview deployments only.
 - Vercel env `VERCEL_DEEP_CLONE=true` so build-time `git log` dates are per-file, not the clone date.
 - Vercel Git integration: production on the default branch, preview deploys per branch.
 - Domain: GitHub Student Developer Pack free domain. Before claiming, check the current Pack offers and renewal price
